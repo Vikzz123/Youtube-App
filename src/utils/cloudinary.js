@@ -1,8 +1,8 @@
-import {v2 as cloudinary} from 'cloudinary';
+import { v2 as cloudinary } from 'cloudinary';
 import fs from 'fs';
 
 cloudinary.config({
-        cloudinary_name: process.env.CLOUDINARY_NAME,
+        cloud_name: process.env.CLOUDINARY_CLOUD_NAME, 
         api_key: process.env.CLOUDINARY_API_KEY,
         api_secret: process.env.CLOUDINARY_API_SECRET
 })
@@ -16,6 +16,7 @@ const uploadOnCloudinary = async (localFilePath) => {
 
           //file has been upload successfully
           console.log("File uploaded Successfully",response.url);
+          fs.unlinkSync(localFilePath)  //automatically remove the files from local storage (public/tmp) when its uploaded successfylly or unsuccessfully on cloudinary
           return response;     
 
        }catch(error){
@@ -25,4 +26,4 @@ const uploadOnCloudinary = async (localFilePath) => {
        }
 }
 
-export {uploadOnCloudinary};
+export { uploadOnCloudinary };

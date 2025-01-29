@@ -17,7 +17,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
 
      const { username, email, fullName, password } = req.body; //destructuring 
-     console.log("email :", email);
+     //console.log("email :", email);
 
      if([fullName, email, username, password].some((field) => field?.trim() === "")) {
           throw new ApiError(400,  "All fields are required");
@@ -32,21 +32,29 @@ const registerUser = asyncHandler(async (req, res) => {
           throw new ApiError(409, "User already exists with this email or username");
      }
 
+    // console.log(req.files);
+
+
      //check for images, avatar
      const avatarLocalPath = req.files?.avatar[0]?.path;
-     const coverImageLocalPath = req.files?.coverImage[0]?.path;
-
-     console.log("avatarLocalPath", avatarLocalPath);
+    // const coverImageLocalPath = req.files?.coverImage[0]?.path;  //here it will throw error when we are sending nothing in cover image 
+     
+    //To handle the error we can check like this 
+    let coverImageLocalPath;
+    if (req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0) {
+        coverImageLocalPath = req.files.coverImage[0].path
+    }
      
      if(!avatarLocalPath) {
-          throw new ApiError(400, "Avatar image is required");
+          throw new ApiError(400, "Avatar image path is required");
      }
 
      //upload them to cloudinary, avatar uploaded ?
      const avatar = await uploadOnCloudinary(avatarLocalPath);
      const coverImage = await uploadOnCloudinary(coverImageLocalPath);
 
-     //console.log("avatar", avatar);
+    // console.log("avatar", avatar); -> not getting avatar
+
      if(!avatar){
           throw new ApiError(400, "Avatar image is required");  
      }
@@ -62,7 +70,7 @@ const registerUser = asyncHandler(async (req, res) => {
      });
                                                                 //means we dont want pass and refreshtoken
      const createdUser = await User.findById(user._id).select("-password -refreshToken");
-     if(!createdUser) {
+     if(!createdUser) {                                        //here password and refreshtoken wont show in postman console
           throw new ApiError(500, "Something went wrong while registering, User not created");
      }
 
